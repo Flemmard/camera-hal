@@ -2,7 +2,8 @@
 #define __CAMERA_H__
 
 #include <stdint.h>
-#include <media/msm_camera.h>
+#include <linux/msm_ion.h>
+#include <media/msm_camera_legacy.h>
 #include <pthread.h>
 #include <linux/videodev2.h>
 #include <sys/mman.h>
@@ -430,7 +431,7 @@ typedef struct {
   int8_t camera_id;
   cam_position_t position;
   uint32_t sensor_mount_angle;
-}camera_info_t;
+}mm_camera_info_t;
 
 typedef struct {
   camera_mode_t mode;
