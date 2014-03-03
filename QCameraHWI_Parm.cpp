@@ -866,12 +866,25 @@ void QCameraHardwareInterface::initDefaultParameters()
     String8 vSize = create_sizes_str(&mVideoSizes[0], 1);
     mParameters.set(CameraParameters::KEY_VIDEO_SIZE, vSize.string());
 
+    mm_camera_dimension_t dim;
     //Set Preview size
-    mParameters.setPreviewSize(DEFAULT_PREVIEW_WIDTH, DEFAULT_PREVIEW_HEIGHT);
+    /* Get maximum preview size supported by sensor*/
+    memset(&dim, 0, sizeof(mm_camera_dimension_t));
+    ret = cam_config_get_parm(mCameraId,
+                              MM_CAMERA_PARM_MAX_PREVIEW_SIZE, &dim);
+    if (ret != NO_ERROR)
+      {
+	mParameters.setPreviewSize(DEFAULT_PREVIEW_WIDTH, DEFAULT_PREVIEW_HEIGHT);
+	dim.width = DEFAULT_PREVIEW_WIDTH;
+	dim.height = DEFAULT_PREVIEW_HEIGHT;
+      }
+    else
+      mParameters.setPreviewSize(dim.width, dim.height);
+
     mParameters.set(CameraParameters::KEY_SUPPORTED_PREVIEW_SIZES,
                     mPreviewSizeValues.string());
-    mDimension.display_width = DEFAULT_PREVIEW_WIDTH;
-    mDimension.display_height = DEFAULT_PREVIEW_HEIGHT;
+    mDimension.display_width = dim.width;
+    mDimension.display_height = dim.height;
 
     //Set Preview Frame Rate
     if(mFps >= MINIMUM_FPS && mFps <= MAXIMUM_FPS) {
@@ -3348,7 +3361,7 @@ status_t QCameraHardwareInterface::setPreviewSizeTable(void)
 end:
     /* Save the table in global member*/
     mPreviewSizes = preview_size_table;
-    mPreviewSizeCount = preview_table_size - i;
+    mPreviewSizeCount = preview_table_size;
 
     return ret;
 }
